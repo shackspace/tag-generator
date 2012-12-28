@@ -30,4 +30,4 @@ pip-log.txt
 .idea/
 
 #vim swap files
-.swp
+*.swp
