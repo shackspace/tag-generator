@@ -1,11 +1,11 @@
 <!doctype html>
 <html>
 <head>
-    <link href="/static/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="hero-unit">
-    <h1>Generate QR-Code <font color="red">BETA</font> </h1>
+    <h1>Generate QR-Code <span class="text-error">BETA</span> </h1>
 
     <p>Add your project or box and generate a fancy QR Code</p>
 </div>
@@ -13,70 +13,34 @@
 
     <form method="POST" action="/publish" class="form-horizontal">
         <div class="control-group">
-            <label class="control-label">Owner</label>
+            <label for="handle" class="control-label">Handle</label>
 
             <div class="controls">
-                <input type="text" id="owner-name" name="owner-name">
+                <input required type="text" id="handle" name="handle" placeholder="Name, Nick, etc.">
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label">E-Mail</label>
+            <label for="email" class="control-label">E-Mail</label>
 
             <div class="controls">
-                <input type="text" id="owner-email" name="owner-email">
+                <input required type="text" id="email" name="email" placeholder="user@example.com">
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label">Twitter (optional)</label>
-
-            <div class="controls">
-                <input type="text" id="owner-twitter" name="owner-twitter">
-            </div>
-        </div>
-
-        <div class="control-group">
-            <label class="control-label">Telephone (optional)</label>
-
-            <div class="controls">
-                <input type="text" id="owner-telephone" name="owner-telephone">
-            </div>
-        </div>
-
-        <div class="control-group">
-            <label class="control-label">Typ</label>
-
-            <div class="controls">
-                <label class="radio">Projekt
-                    <input type="radio" name="item-type" id="item-type-project" value="item-type-project">
-                </label>
-                <label class="radio">Box
-                    <input type="radio" name="item-type" id="item-type-box" value="item-type-box" checked>
-                </label>
-            </div>
-        </div>
-        <div id="item-details">
             <div class="control-group">
-                <label class="control-label">wiki-id <br/>/wiki/doku.php?id=ID</label>
+                <label for="freetext" class="control-label">Freitext</label>
 
                 <div class="controls">
-                    <input type="text" id="wiki-id" name="wiki-id" placeholder="project:">
+                    <textarea rows="3" cols="40" id="freetext" name="freetext" placeholder="z.B.: Lieblingskontaktierungsmöglichkeit"></textarea>
                 </div>
             </div>
-
             <div class="control-group">
-                <label class="control-label">Freetext</label>
-
-                <div class="controls">
-                    <textarea rows="3" cols="40" id="freetext" name="freetext"></textarea>
-                </div>
-            </div>
-        </div>
         <div class="controls">
             <input type="submit" class="btn btn-primary btn-large" id="submit-button" value="Generatorisieren">
         </div>
     </form>
 </div>
-<script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="/static/index.js"></script>
+<script src="/static/js/jquery-1.8.3.min.js" type="text/javascript"></script>
+<script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/static/js/index.js" type="text/javascript"></script>
 </body>
 </html>
