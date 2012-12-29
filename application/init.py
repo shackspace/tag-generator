@@ -1,6 +1,5 @@
-from flask import Flask, url_for, render_template, request, abort, make_response, send_file, redirect
+from flask import Flask, render_template, request, abort, send_file, redirect
 import json
-import re
 app = Flask(__name__)
 
 #app.config["SERVER_NAME"] = "127.0.0.1:8080"
@@ -31,57 +30,31 @@ def hello():
 @app.route("/publish", methods=["POST"])
 def publish():
     try:
-        EVIL=re.compile('["\'<>!;#{}`]')
-
-        owner = EVIL.sub("_",request.form["owner-name"])
-        print owner
-        email = EVIL.sub("_",request.form["owner-email"])
-        print email
-        twitter = EVIL.sub("_",request.form["owner-twitter"])
-        print "twitter"+twitter
-        item_type = EVIL.sub("_",request.form["item-type"])
-        wiki_id = request.form.get("wiki-id","")
-        if request.form.get("wiki-id"):
-            url = "shackspace.de/wiki/doku.php?id=" + \
-                EVIL.sub("_",wiki_id)
-        else:
-            url = ""
-        text = EVIL.sub("_",request.form["freetext"])
-        telephone = EVIL.sub("_",request.form["owner-telephone"])
+        handle = request.form["handle"]
+        email = request.form["email"]
+        text = request.form["freetext"]
     except:
         abort(500)
 
-    if item_type == "item-type-project":
-        item_type = "project"
-        qr_data = url
-    elif item_type == "item-type-box":
-        item_type = "box"
-        qr_data = "mailto:%s" % email
-    else:
-        return "WTF?"
-
-    ident = len(db[item_type])
-    db[item_type].append({"owner": owner, "email": email, "ident": ident, "url": url, "text": text, "twitter": twitter,
-        "telephone": telephone, "qr_data": qr_data,})
+    db.append({"handle": handle, "email": email, "text": text,})
     save_db()
-    return redirect("/%s/details/%d" % (item_type, ident))
+    return redirect("/details/%d" % (len(db)-1))
 
 
-@app.route("/<typ>/qr/<int:ident>")
-def gen_qr(typ=None, ident=None):
+@app.route("/qr/<int:ident>")
+def gen_qr(ident=None):
     if ident is None: abort(500)
-    if typ not in ["box", "project"]: abort(404)
     data = {}
-    try: data = db[typ][ident]
+    try: data = db[ident]
     except: abort(404)
 
     import qrcode
     import os.path
 
-    qrpath = "qr/%s_%s" % (typ, ident)
+    qrpath = "qr/%s.png" % (ident)
     if not os.path.isfile(qrpath):  #skip if qrcode has already been written
-        qr = qrcode.QRCode(version=5, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=15, border=0)
-        qr.add_data("%s" % (data["qr_data"]))
+        qr = qrcode.QRCode(version=5, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=30, border=0)
+        qr.add_data("%s" % (data["email"]))
         qr.make(fit=True)
         img = qr.make_image()
         img.save(qrpath)
@@ -89,35 +62,30 @@ def gen_qr(typ=None, ident=None):
 
     assert (os.path.isfile(qrpath))
     f = open(qrpath)
-    #response = make_response(f.read())
-    #f.close()
-    #response.headers["Content-Type"] = "image/png"
     return send_file(f, mimetype="image/png")
 
 
-@app.route("/<typ>/details/<int:ident>")
-def details_for(typ, ident=None):
+@app.route("/details/<int:ident>")
+def details_for(ident=None):
     """
     returns details for box or project
     """
-    if typ not in ["box", "project"]: abort(404)
     if ident is None: abort(500)
 
     data = {}
-    try: data = db[typ][ident]
-    except: print "%s %d not found" % (typ, ident)
-    return render_template("%s.html" % typ, host=request.host,app=app, ident=ident, data=data)
+    try: data = db[ident]
+    except: print "%d not found" % (ident)
+    return render_template("tag.html", host=request.host, app=app, ident=ident, data=data)
 
 
-@app.route("/<typ>/details/<int:ident>/json")
-def json_for(typ, ident=None):
+@app.route("/details/<int:ident>/json")
+def json_for(ident=None):
     import json
 
-    if typ not in ["box", "project"]: abort(404)
     if ident is None: abort(500)
 
     data = {}
-    try: data = db[typ][ident]
+    try: data = db[ident]
     except: abort(404)
     return json.dumps(data)
 
@@ -125,68 +93,34 @@ def json_for(typ, ident=None):
 def generate_cute_qr(qrpath, data):
     from PIL import Image, ImageDraw, ImageFont
 
-    heading = "A Hacker known as %s" % (data["owner"])
+    handletext = data["handle"]
     emailtext = "Email: %s" % data["email"]
-    twittertext = "Twitter: %s" % data["twitter"]
-    urltext = "URL: http://%s" % data["url"]
     freitext = "%s" % data["text"]
-    telephonetext = "Telephone: %s" % data["telephone"]
-    textOffset = 0
 
-    im = Image.open("../resources/A6_300dpi.png")
+
+    im = Image.open("../resources/A4_300dpi_generic_tag.png")
     qr = Image.open(qrpath)
-    qr.convert('RGB')
-    im.convert('RGB')
+    qr = qr.resize((896, 896), Image.BICUBIC)
 
-    headingFontsize = 70
-    headingFont = ImageFont.truetype("../resources/arialbd.ttf", headingFontsize)
-    textFontsize = 40
-    textFont = ImageFont.truetype("../resources/arial.ttf", textFontsize)
-    offsetX = 340  #offset for the shackspace logo on the leftside
+    textFontsize = 200
+    textFont = ImageFont.truetype("../resources/Vera.ttf", textFontsize)
+    offsetX = 444  #offset for the shackspace logo on the leftside
     draw = ImageDraw.Draw(im)
 
-    #Heading
-    headingWidth, headingHeight = draw.textsize(heading, font=headingFont)
-    sizeX = im.size[0]
-    sizeY = im.size[1]
-    draw.text((((sizeX - offsetX) / 2) - (headingWidth / 2 - offsetX), sizeY / 8), 
-            heading, font=headingFont, fill="#000000")
-
-    #Text
-    textWidth, textHeight = draw.textsize(emailtext, font=textFont)
-    text_offsetX = ((sizeX - offsetX) / 3)
-    text_baseline = (sizeY / 5)
-
-    draw.text((text_offsetX, sizeY / 5), emailtext, font=textFont, fill="#000000")
-    textOffset += textHeight
-
-    if data["twitter"]:
-        draw.text((text_offsetX, text_baseline + textOffset), twittertext, font=textFont, fill="#000000")
-        textOffset += textHeight
-
-    if data["url"]:
-        draw.text((text_offsetX, text_baseline + textOffset), urltext, font=textFont, fill="#000000")
-        textOffset += textHeight
-
-    if data["telephone"]:
-        draw.text((text_offsetX, text_baseline + textOffset), telephonetext, font=textFont, fill="#000000")
-        textOffset += textHeight
-
-    if data["text"]: #add another line
-        textOffset += textHeight
-        draw.text((text_offsetX, text_baseline + textOffset), freitext, font=textFont, fill="#000000")
+    draw.text((offsetX, 400), handletext, font=textFont, fill="#000000")
+    draw.text((offsetX, 800), emailtext,  font=textFont, fill="#000000")
+    draw.text((offsetX, 1200), freitext,   font=textFont, fill="#000000")
 
     #QR-Code
-    im.paste(qr, (int((sizeX - offsetX) / 2 - (qr.size[0] / 2 - offsetX)), int(sizeY / 2.2)))
+    im.paste(qr, (2392, 300))
     del draw
     im.save(qrpath, "PNG")
 
 if __name__ == "__main__":
-    from os import system
     #url_for('static', filename='index.js')
     #url_for('static', filename='jquery-1.7.2.min.js')
     app.debug = True
     #system("rm qr/*")
-    db = {"box": [], "project": []}
+    db = []
     db = load_db()
     app.run(host="0.0.0.0", port=8080)
