@@ -32,7 +32,5 @@ Running the Server
 Flask
 -----
 0. ```cd application```
-1. Set Server Name:
-  ```sed -i 's/incept.krebsco.de/localhost/' init.py```
-2. ```python init.py```
+0. ```python init.py```
 
