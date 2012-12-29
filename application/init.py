@@ -94,7 +94,7 @@ def generate_cute_qr(qrpath, data):
     from PIL import Image, ImageDraw, ImageFont
 
     handletext = data["handle"]
-    emailtext = "Email: %s" % data["email"]
+    emailtext = data["email"]
     freitext = "%s" % data["text"]
 
 
@@ -102,14 +102,15 @@ def generate_cute_qr(qrpath, data):
     qr = Image.open(qrpath)
     qr = qr.resize((896, 896), Image.BICUBIC)
 
-    textFontsize = 200
-    textFont = ImageFont.truetype("../resources/Vera.ttf", textFontsize)
-    offsetX = 444  #offset for the shackspace logo on the leftside
+    textFontsize = 160
+    textFont = ImageFont.truetype("../resources/VeraBd.ttf", textFontsize)
+    monoFont = ImageFont.truetype("../resources/VeraMono.ttf", textFontsize)
+    offsetX = 300  #offset for the shackspace logo on the leftside
     draw = ImageDraw.Draw(im)
 
-    draw.text((offsetX, 400), handletext, font=textFont, fill="#000000")
-    draw.text((offsetX, 800), emailtext,  font=textFont, fill="#000000")
-    draw.text((offsetX, 1200), freitext,   font=textFont, fill="#000000")
+    draw.text((offsetX, 300), handletext, font=textFont, fill="#000000")
+    draw.text((offsetX, 600), emailtext,  font=textFont, fill="#000000")
+    draw.text((offsetX, 1000), freitext,   font=monoFont, fill="#000000")
 
     #QR-Code
     im.paste(qr, (2392, 300))
