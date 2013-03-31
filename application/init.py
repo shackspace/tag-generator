@@ -87,7 +87,8 @@ def details_for(ident=None):
 def json_for(ident=None):
     import json
 
-    if ident is None: abort(500)
+    if ident is None:
+        abort(500)
 
     data = {}
     try:
@@ -96,9 +97,9 @@ def json_for(ident=None):
         abort(404)
     return json.dumps(data)
 
-
 def generate_cute_qr(qrpath, data):
     from PIL import Image, ImageDraw, ImageFont
+    import os
 
     handletext = data["handle"]
     emailtext = data["email"]
@@ -115,8 +116,15 @@ def generate_cute_qr(qrpath, data):
     draw = ImageDraw.Draw(im)
 
     draw.text((offsetX, 300), handletext, font=textFont, fill="#000000")
-    draw.text((offsetX, 600), emailtext,  font=textFont, fill="#000000")
-    draw.text((offsetX, 1000), freitext,   font=monoFont, fill="#000000")
+    draw.text((offsetX, 600), emailtext, font=textFont, fill="#000000")
+
+    # handle line breaks in freetext field
+    faktor = 0
+    for monoline in freitext.split(os.linesep): # assumes linesep at end of line
+        monoline = monoline[:-1]
+        draw.text((offsetX, (1000 + 150*faktor)), monoline, font=monoFont, fill="#000000")
+        faktor += 1
+    #draw.text((offsetX, 1000), freitext, font=monoFont, fill="#000000")
 
     #QR-Code
     im.paste(qr, (2392, 300))
@@ -125,8 +133,6 @@ def generate_cute_qr(qrpath, data):
 
 
 if __name__ == "__main__":
-    #url_for('static', filename='index.js')
-    #url_for('static', filename='jquery-1.7.2.min.js')
     app.debug = True
     #system("rm qr/*")
     db = []
