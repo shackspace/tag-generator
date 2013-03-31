@@ -1,4 +1,8 @@
-*.py[co]
+#from https://raw.github.com/github/gitignore/master/Python.gitignore
+*.py[cod]
+
+# C extensions
+*.so
 
 # Packages
 *.egg
@@ -12,6 +16,9 @@ var
 sdist
 develop-eggs
 .installed.cfg
+lib
+lib64
+__pycache__
 
 # Installer logs
 pip-log.txt
@@ -19,15 +26,20 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
+nosetests.xml
 
-#Translations
+# Translations
 *.mo
 
-#Mr Developer
+# Mr Developer
 .mr.developer.cfg
-
-#jetbrains' IDE
-.idea/
+.project
+.pydevproject
 
 #vim swap files
 *.swp
+*~
+
+.idea/
+/include/
+/local/
