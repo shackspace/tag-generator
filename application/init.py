@@ -3,9 +3,10 @@ import json
 app = Flask(__name__)
 
 #app.config["SERVER_NAME"] = "127.0.0.1:8080"
-DB_FILE="db/db.json"
+DB_FILE = "db/db.json"
 
 # in-memory database
+
 
 def save_db():
   with open(DB_FILE,"w+") as persistence:
@@ -13,14 +14,15 @@ def save_db():
     print "db saved"
     return db
 
+
 def load_db():
   try:
     persistence = open(DB_FILE)
     return json.load(persistence)
-    print "db loaded"
   except:
     print "cannot read db, trying to create it first"
     return save_db()
+
 
 @app.route("/")
 def hello():
@@ -36,7 +38,7 @@ def publish():
     except:
         abort(500)
 
-    db.append({"handle": handle, "email": email, "text": text,})
+    db.append({"handle": handle, "email": email, "text": text, })
     save_db()
     return redirect("/details/%d" % (len(db)-1))
 
@@ -70,11 +72,14 @@ def details_for(ident=None):
     """
     returns details for box or project
     """
-    if ident is None: abort(500)
+    if ident is None:
+        abort(500)
 
     data = {}
-    try: data = db[ident]
-    except: print "%d not found" % (ident)
+    try:
+        data = db[ident]
+    except:
+        print "%d not found" % (ident)
     return render_template("tag.html", host=request.host, app=app, ident=ident, data=data)
 
 
@@ -85,8 +90,10 @@ def json_for(ident=None):
     if ident is None: abort(500)
 
     data = {}
-    try: data = db[ident]
-    except: abort(404)
+    try:
+        data = db[ident]
+    except:
+        abort(404)
     return json.dumps(data)
 
 
@@ -96,7 +103,6 @@ def generate_cute_qr(qrpath, data):
     handletext = data["handle"]
     emailtext = data["email"]
     freitext = "%s" % data["text"]
-
 
     im = Image.open("../resources/A4_300dpi_generic_tag.png")
     qr = Image.open(qrpath)
@@ -116,6 +122,7 @@ def generate_cute_qr(qrpath, data):
     im.paste(qr, (2392, 300))
     del draw
     im.save(qrpath, "PNG")
+
 
 if __name__ == "__main__":
     #url_for('static', filename='index.js')
