@@ -1,20 +1,23 @@
-(function() {
-    "use strict";
-    $(document).ready(function(){
-        var details = $('#item-details').fadeOut(0);
+;(function($) {
+  "use strict";
 
-        if ($('#item-type-project:checked').val()){
-            details.fadeIn();
-        }
-        $('#item-type-box').click(function(){
-            details.fadeOut();
-            $("#wiki-url").val("");
-            $("#freetext").val("");
-        });
+  $(document).ready(function(){
+    var details = $('#item-details').fadeOut(0);
 
-        $('#item-type-project').click(function(){
-            details.fadeIn();
-        });
+    if ($('#item-type-project:checked').val()){
+      details.fadeIn();
+
+    }
+    $('#item-type-box').click(function(){
+      details.fadeOut();
+      $("#wiki-url").val("");
+      $("#freetext").val("");
     });
-})();
+
+    $('#item-type-project').click(function(){
+      details.fadeIn();
+    });
+  });
+
+})(jQuery);
 
