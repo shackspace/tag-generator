@@ -43,3 +43,4 @@ nosetests.xml
 .idea/
 /include/
 /local/
+application/db/db.json
